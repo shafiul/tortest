@@ -1901,9 +1901,9 @@ choose_array_element_by_weight(const u64_dbl_t *entries, int n_entries)
 
   /* Log some data */
 
-
+  /*
   log_info(LD_CIRC,
-           "SGIGAS Index Chosen: %d", ss_chosen_index);
+           "SGIGAS Index Chosen: %d", ss_chosen_index);*/
 
   tor_assert(ss_chosen_index >= 0);
   tor_assert(ss_chosen_index < n_entries);

@@ -1835,6 +1835,42 @@ gt_i64_timei(uint64_t a, uint64_t b)
 }
 #endif
 
+/* SS Begin */
+
+void ss_sort_rnode(u64_dbl_t *bandwidths, ss_rnode *rnodes, int n){
+  int i, j;
+  ss_rnode temp;
+
+  /* populate ss_rnode */
+
+  for(i=0; i<n; i++){
+    rnodes[i].weight = bandwidths[i].u64;
+    rnodes[i].id = i;
+  }
+
+  for (i = 1; i < n; i++)
+    for (j = 0; j < n - i; j++) {
+      if (rnodes[j].weight < rnodes[j + 1].weight) {
+        temp = rnodes[j];
+        rnodes[j] = rnodes[j + 1];
+        rnodes[j + 1] = temp;
+      }
+    }
+}
+
+
+double ss_f(int s, double x){
+  if(s == 0)
+    return x;
+  return (1 - pow(2, (s*x))) / (1 - pow(2, s)) * 1.0;
+}
+
+int ss_g(int old_index, int s, double x){
+  return (int) floor(old_index * ss_f(s, x));
+}
+
+/* SS End */
+
 /** Pick a random element of <b>n_entries</b>-element array <b>entries</b>,
  * choosing each element with a probability proportional to its (uint64_t)
  * value, and return the index of that element.  If all elements are 0, choose
@@ -1843,6 +1879,40 @@ gt_i64_timei(uint64_t a, uint64_t b)
 STATIC int
 choose_array_element_by_weight(const u64_dbl_t *entries, int n_entries)
 {
+
+  /* SS Begin */
+
+  int param_s = 15, ss_chosen_index;
+  double ss_rand;
+
+  ss_rnode *rn = tor_malloc_zero(sizeof(ss_rnode)*n_entries);
+
+  /* sort nodes according to bandwidth, decreasing order */
+  ss_sort_rnode(entries, rn, n_entries);
+
+  /* Pick a random real number (0, 1] */
+  ss_rand = crypto_rand_double();
+
+  /* Pick an Index */
+  ss_chosen_index = ss_g(n_entries, param_s, ss_rand);
+
+  /* free rn */
+  tor_free(rn);
+
+  /* Log some data */
+
+
+  log_info(LD_CIRC,
+           "SGIGAS Index Chosen: %d", ss_chosen_index);
+
+  tor_assert(ss_chosen_index >= 0);
+  tor_assert(ss_chosen_index < n_entries);
+
+  return ss_chosen_index;
+
+  /* SS End */
+
+  /*
   int i, i_chosen=-1, n_chosen=0;
   uint64_t total_so_far = 0;
   uint64_t rand_val;
@@ -1868,6 +1938,7 @@ choose_array_element_by_weight(const u64_dbl_t *entries, int n_entries)
       n_chosen++;
       /* Set rand_val to INT64_MAX rather than stopping the loop. This way,
        * the time we spend in the loop does not leak which element we chose. */
+  /*
       rand_val = INT64_MAX;
     }
   }
@@ -1877,6 +1948,7 @@ choose_array_element_by_weight(const u64_dbl_t *entries, int n_entries)
   tor_assert(i_chosen < n_entries);
 
   return i_chosen;
+*/
 }
 
 /** When weighting bridges, enforce these values as lower and upper

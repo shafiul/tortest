@@ -18,6 +18,8 @@
 #include "testsupport.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h> /* SS INLINE */
+
 #ifdef _WIN32
 /* for the correct alias to struct stat */
 #include <sys/stat.h>

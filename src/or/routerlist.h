@@ -13,6 +13,16 @@
 
 #include "testsupport.h"
 
+/* SS Begin */
+
+typedef struct ss_rnode {
+    int id;
+    uint64_t weight;
+} ss_rnode;
+
+/* SS End */
+
+
 int get_n_authorities(dirinfo_type_t type);
 int trusted_dirs_reload_certs(void);
 

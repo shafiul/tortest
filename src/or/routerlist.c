@@ -1882,10 +1882,19 @@ choose_array_element_by_weight(const u64_dbl_t *entries, int n_entries)
 
   /* SS Begin */
 
-  int param_s = 15, ss_chosen_index;
+  int param_s = 0, ss_chosen_index, i, total;
   double ss_rand;
 
-  ss_rnode *rn = tor_malloc_zero(sizeof(ss_rnode)*n_entries);
+  for (i = 0; i < n_entries; ++i)
+    total += entries[i].u64;
+
+  if (n_entries < 1)
+    return -1;
+
+  if (total == 0)
+    return crypto_rand_int(n_entries);
+
+  ss_rnode *rn = tor_malloc_zero(sizeof(ss_rnode)* n_entries);
 
   /* sort nodes according to bandwidth, decreasing order */
   ss_sort_rnode(entries, rn, n_entries);
@@ -1901,9 +1910,9 @@ choose_array_element_by_weight(const u64_dbl_t *entries, int n_entries)
 
   /* Log some data */
 
-  /*
-  log_info(LD_CIRC,
-           "SGIGAS Index Chosen: %d", ss_chosen_index);*/
+  printf("SGIGAS Index Chosen: %d\n", ss_chosen_index);
+
+  printf("SGIGAS Num Routers: %d\n", n_entries);
 
   tor_assert(ss_chosen_index >= 0);
   tor_assert(ss_chosen_index < n_entries);
